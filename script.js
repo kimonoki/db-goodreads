@@ -1,3 +1,5 @@
+//todo: delay 1 second after every request to goodreads
+
 // ==UserScript==
 // @name         Douban Goodreads Ratings
 // @version      0.1
@@ -8,7 +10,7 @@
 // @match        *://www.goodreads.com/book/show/*
 // @grant        GM_xmlhttpRequest
 // @connect      api.douban.com
-// @connect      app.godreads.com
+// @connect      www.goodreads.com
 // ==/UserScript==
 
 function getJSON_GM(url, callback) {
@@ -27,17 +29,33 @@ function getJSON_GM(url, callback) {
     });
 }
 
+function isEmpty(s){
+    return !s;
+}
+
+function getIsbn(isbn13,isbn10){
+    return isbn13||isbn10;
+}
 
 
 (function(){
     var host= location.hostname;
+    var isbn10=0; 
+    var isbn13=0;
     if (host==='book.douban.com') {
-        console.log('test');
         var dbbook_id=location.href.match(/douban\.com\/subject\/(\d+)/)[1]; 
-        window.console.log(dbbook_id);
-        
-        getJSON_GM('https://api.douban.com/v2/book/' + dbbook_id , function (data){
-            console.log(data});
+        getJSON_GM('https://api.douban.com/v2/book/'+dbbook_id,function (data){
+            isbn10=data.isbn10;
+            isbn13=data.isbn13;
+            console.log(getIsbn(isbn13,isbn10));
+            if (!isbn10&&!isbn13) {  //no isbn data returned
+                console.log('no isbn data,please find another id of this book')}
+            getJSON_GM('https://www.goodreads.com/book/review_counts.json?key=hqtHAxKsgeHAQ189LEVjg&isbns='+isbn13,function(data){
+            console.log(data.books[0].average_rating);
+         })
+        });
+
+
     }
 
 })();
