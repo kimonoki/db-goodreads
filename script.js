@@ -5,7 +5,7 @@
 
 // ==UserScript==
 // @name         Douban Goodreads Ratings
-// @version      0.1
+// @version      1.0
 // @description  Show Goodreads ratings on Douban
 // @description:zh-CN 在豆瓣读书界面上显示goodreads评分
 // @author       kimonoki
@@ -53,7 +53,7 @@ function insertRating(parent,title,rating,ratings_count,text_reviews_count,link)
             '<div class="rating_right">'+
                 '<div class="ll bigstar' +star+'"></div>'+
                 '<div class="rating_sum">'+ '<a href='+link+'>'+ ratings_count+' Ratings'+'</a>'+
-                '<div class="rating_sum">'+ text_reviews_count + 'Reviews' +'</div>'+
+                '<div class="rating_sum">'+ text_reviews_count + ' Reviews' +'</div>'+
                 '</div>'+
                 
             '</div>'+
