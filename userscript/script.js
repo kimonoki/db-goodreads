@@ -37,6 +37,15 @@ function isEmpty(s){
     return !s;
 }
 
+function isPlural(n){
+    if(n>1){
+        return 's';
+    }
+    else{
+        return '';
+    }
+}
+
 function getIsbn(isbn13,isbn10){
     return isbn13||isbn10;
 }
@@ -46,21 +55,21 @@ function insertRating(parent,title,rating,ratings_count,text_reviews_count,link)
     var star = (5 * Math.round(rating)).toString();
     if (star.length == 1)
         star = '0' + star;
-    parent.insertAdjacentHTML('beforeEnd',
+        parent.insertAdjacentHTML('beforeEnd',
         '<div class="rating_logo">'+title+'</div>'+
         '<div class="rating_self clearfix">'+
             '<strong class="ll rating_num ">'+rating.toFixed(1)+'</strong>'+
             '<div class="rating_right">'+
                 '<div class="ll bigstar' +star+'"></div>'+
-                '<div class="rating_sum">'+ '<a href='+link+'>'+ ratings_count+' Ratings'+'</a>'+
-                '<div class="rating_sum">'+ text_reviews_count + ' Reviews' +'</div>'+
+                '<div class="rating_sum">'+ '<a href='+link+'>'+ ratings_count+' Rating'+isPlural(ratings_count)+'</a>'+
+                '<div class="rating_sum">'+ text_reviews_count + ' Review'+isPlural(text_reviews_count) +'</div>'+
                 '</div>'+
                 
             '</div>'+
         '</div>'
-        
-        
     );
+
+    
 }
 
 
