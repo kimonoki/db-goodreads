@@ -161,7 +161,7 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
         getJSON_GM('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
             if(!isEmpty(data.rating)){
-                console.log(data.rating);
+                console.log(data.rating.avaerage);
             }
 
 
