@@ -1,6 +1,6 @@
-//todo: showing google book rating, ratnum and link
+//todo: 
 //      if no douban ratings, push goodreads ratings to the front(nonedisplay douban ratings)
-//      handle 
+//      chrome extension
 
 // ==UserScript==
 // @name         Douban Goodreads Ratings
@@ -15,6 +15,8 @@
 // @connect      www.goodreads.com
 // @connect      www.googleapis.com
 // ==/UserScript==
+
+
 
 function getJSON_GM(url, callback) {
     GM_xmlhttpRequest({
@@ -57,7 +59,7 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
     if (star.length == 1)
         star = '0' + star;
         parent.insertAdjacentHTML('beforeEnd',
-        '<div class="rating_logo" style="background-color: red !important ">'+title+'</div>'+
+        '<div class="rating_logo">'+title+'</div>'+
         '<div class="rating_self clearfix">'+
             '<strong class="ll rating_num ">'+rating.toFixed(1)+'</strong>'+
             '<div class="rating_right">'+
@@ -72,35 +74,62 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
     
 }
 
+function insertRatingGR(parent,rating){
+    rating=rating/2;
+    let star;
+    for(var i = 0;i<Math.floor(rating);i++){
+        star+='<span size="12x12" class="staticStar p10"></span>';
+    }
+    if((rating-Math.floor(rating))>0.5){
+        star+='<span size="12x12" class="staticStar p6"></span>';
+    }
+    else if(rating-Math.floor(rating)>0&&rating-Math.floor(rating)<0.5) {
+        star+='<span size="12x12" class="staticStar p3"></span>';
+    }
+    if(5-Math.ceil(rating)){
+        star+='<span size="12x12" class="staticStar p0"></span>'
+    }
+    parent.insertAdjacentHTML('afterend',
+   ' <div class="uitext stacked hreview-aggregate" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">'+
+        '<span class="stars staticStars">'+star+'</span>'+
+        '<span class="value rating">'+'<span class="average" itemprop="ratingValue">'+rating+'</span>'+'</span>'+
+    '</div>'
+    
+    )
+}
+
 
 
 (function(){
 
-    //DOM handeling on db
-    //insert goodreads ratings
-    let dbratings=document.getElementById('ratings');
-    let sectl = document.getElementById('interest_sectl');
-    let ratings = document.createElement('div');
-    //set same css style as the original site
-    ratings.style.padding = '15px 0';
-    ratings.style.borderTop = '1px solid #eaeaea';
-    //if there's friends' rating,insert after it
-    let rating_wrap = document.querySelector('.friends_rating_wrap');
-    if (!rating_wrap) //if no insert directly
-        rating_wrap = document.querySelector('.rating_wrap');
-    // insert the wrapper of the rating section
+   
 
 
     //DOM handling on gr
 
-    
+
 
     let host= location.hostname;
     let isbn10=0; 
     let isbn13=0;
     let isbn=0;
+
     if (host==='book.douban.com') {
+        
+         //DOM handeling on db
+        //insert goodreads ratings
+        let dbratings=document.getElementById('ratings');
         let sectl = document.getElementById('interest_sectl');
+        let ratings = document.createElement('div');
+        //set same css style as the original site
+        ratings.style.padding = '15px 0';
+        ratings.style.borderTop = '1px solid #eaeaea';
+        //if there's friends' rating,insert after it
+        let rating_wrap = document.querySelector('.friends_rating_wrap');
+        if (!rating_wrap) //if no insert directly
+            rating_wrap = document.querySelector('.rating_wrap');
+        // insert the wrapper of the rating section
+
         let dbbook_id=location.href.match(/douban\.com\/subject\/(\d+)/)[1]; 
         getJSON_GM('https://api.douban.com/v2/book/'+dbbook_id,function (data){
             isbn10=data.isbn10;
@@ -152,16 +181,25 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
 
 
     else if (host==='www.goodreads.com'){
-        console.log('success')
+        let ISBN;
         let details=document.getElementById('bookDataBox');
-        let ISBN =details.querySelector('.infoBoxRowItem').innerText.match(/(\d+).+ISBN13:\s(\d+)/);
-        let isbn10 =ISBN[1];
-        let isbn13 =ISBN[2];
-        let isbn=getIsbn(isbn13,isbn10);
+        let bookMeta=document.getElementById('bookMeta');
+        if(details.querySelector('.infoBoxRowTitle').innerText=='Original Title'){
+            let clearFloats =details.querySelector('.clearFloats').nextElementSibling;
+            ISBN = clearFloats.querySelector('.infoBoxRowItem').innerText.match(/(\d+).+ISBN13:\s(\d+)/);
+        }
+        else{
+            ISBN =details.querySelector('.infoBoxRowItem').innerText.match(/(\d+).+ISBN13:\s(\d+)/);
+        }
+        
+        isbn10 =ISBN[1];
+        isbn13 =ISBN[2];
+        isbn=getIsbn(isbn13,isbn10);
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
         getJSON_GM('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
             if(!isEmpty(data.rating)){
-                console.log(data.rating.avaerage);
+                console.log(data.rating.average);
+                insertRatingGR(bookMeta,data.rating.average);
             }
 
 
