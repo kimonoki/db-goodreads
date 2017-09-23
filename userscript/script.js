@@ -4,7 +4,7 @@
 
 // ==UserScript==
 // @name         Douban Goodreads Ratings
-// @version      1.1
+// @version      1.2
 // @description  Show Goodreads ratings on Douban
 // @description:zh-CN 在豆瓣读书界面上显示goodreads评分
 // @author       kimonoki
@@ -74,7 +74,7 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
     
 }
 
-function insertRatingGR(parent,rating){
+function insertRatingGR(parent,link,rating){
     rating=rating/2;
     let star;
     for(var i = 0;i<Math.floor(rating);i++){
@@ -90,9 +90,11 @@ function insertRatingGR(parent,rating){
         star+='<span size="12x12" class="staticStar p0"></span>'
     }
     parent.insertAdjacentHTML('afterend',
-   ' <div class="uitext stacked hreview-aggregate" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">'+
+   ' <div class="uitext stacked hreview-aggregate" style="position: relative; border-top:1px solid #ddd; padding-top:10px" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">'+
         '<span class="stars staticStars">'+star+'</span>'+
-        '<span class="value rating">'+'<span class="average" itemprop="ratingValue">'+rating+'</span>'+'</span>'+
+        '<span class="value rating">'+'<span class="average" itemprop="ratingValue">'+' '+rating+'</span>'+'</span>'+
+        '<span class="greyText">'+'&nbsp;·&nbsp;'+'</span>'+
+        '<a class="actionLinkLite" style="cursor: pointer; " href="'+link+'">'+' Douban 评分 '+'</a>'+
     '</div>'
     
     )
@@ -105,7 +107,7 @@ function insertRatingGR(parent,rating){
    
 
 
-    //DOM handling on gr
+
 
 
 
@@ -199,7 +201,7 @@ function insertRatingGR(parent,rating){
         getJSON_GM('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
             if(!isEmpty(data.rating)){
                 console.log(data.rating.average);
-                insertRatingGR(bookMeta,data.rating.average);
+                insertRatingGR(bookMeta,'https://book.douban.com/subject/'+data.id,data.rating.average);
             }
 
 
