@@ -4,7 +4,7 @@
 
 // ==UserScript==
 // @name         Douban Goodreads Ratings
-// @version      1.2
+// @version      1.1
 // @description  Show Goodreads ratings on Douban
 // @description:zh-CN 在豆瓣读书界面上显示goodreads评分
 // @author       kimonoki
@@ -118,14 +118,10 @@ function insertRatingGR(parent,link,rating){
 
     if (host==='book.douban.com') {
         
-         //DOM handeling on db
         //insert goodreads ratings
-        let dbratings=document.getElementById('ratings');
         let sectl = document.getElementById('interest_sectl');
         let ratings = document.createElement('div');
-        //set same css style as the original site
-        ratings.style.padding = '15px 0';
-        ratings.style.borderTop = '1px solid #eaeaea';
+        ratings.style.marginBottom  = '15px';
         //if there's friends' rating,insert after it
         let rating_wrap = document.querySelector('.friends_rating_wrap');
         if (!rating_wrap) //if no insert directly
@@ -149,16 +145,18 @@ function insertRatingGR(parent,link,rating){
             // test goodreads data response
             console.log('goodreads rating: '+data.books[0].average_rating);
 
-            //change dbrating into nondisplay elements
-                if(data.books[0].reviews_count&&dbratings==0){
-                    dbratings.style.display='none';
-                }
+
 
             //insert goodreading ratings
                 if(data.books[0].reviews_count){
                     sectl.insertBefore(ratings, rating_wrap.previousSibling);
                     insertRatingDB(ratings,'Goodreads Rating',data.books[0].average_rating,data.books[0].ratings_count,data.books[0].text_reviews_count,'https://www.goodreads.com/book/isbn/'+isbn);
             }
+
+                //change dbrating into nondisplay elements if there is none
+                if(data.books[0].reviews_count&&document.getElementsByClassName('rating_num')[1].innerText===''){
+                    document.getElementsByClassName('rating_wrap')[0].style.display='none';
+                }
 
             })
 
