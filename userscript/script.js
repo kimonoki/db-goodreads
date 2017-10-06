@@ -1,10 +1,8 @@
-//todo: 
-//      if no douban ratings, push goodreads ratings to the front(nonedisplay douban ratings)
-//      chrome extension
+
 
 // ==UserScript==
 // @name         Douban Goodreads Ratings
-// @version      1.1
+// @version      1.2
 // @description  Show Goodreads ratings on Douban
 // @description:zh-CN 在豆瓣读书界面上显示goodreads评分
 // @author       kimonoki
@@ -17,6 +15,7 @@
 // ==/UserScript==
 
 
+const grapikey= 'yourgrapikey here';
 
 function getJSON_GM(url, callback) {
     GM_xmlhttpRequest({
@@ -140,7 +139,7 @@ function insertRatingGR(parent,link,rating){
             },500);
 
             //get goodreads rating and info
-            getJSON_GM('https://www.goodreads.com/book/review_counts.json?'+'key='+'hqtHAxKsgeHAQ189LEVjg&isbns='+isbn,function(data){
+            getJSON_GM('https://www.goodreads.com/book/review_counts.json?'+'key='+grapikey+isbn,function(data){
             
             // test goodreads data response
             console.log('goodreads rating: '+data.books[0].average_rating);
