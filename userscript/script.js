@@ -14,8 +14,10 @@
 // @connect      www.googleapis.com
 // ==/UserScript==
 
+function getApikey(){
+    return 'hqtHAxKsgeHAQ189LEVjg';
+}
 
-const grapikey= 'yourgrapikey here';
 
 function getJSON_GM(url, callback) {
     GM_xmlhttpRequest({
@@ -107,7 +109,7 @@ function insertRatingGR(parent,link,rating){
 
 
 
-
+    const grapikey= getApikey();
 
 
     let host= location.hostname;
@@ -139,7 +141,7 @@ function insertRatingGR(parent,link,rating){
             },500);
 
             //get goodreads rating and info
-            getJSON_GM('https://www.goodreads.com/book/review_counts.json?'+'key='+grapikey+isbn,function(data){
+            getJSON_GM('https://www.goodreads.com/book/review_counts.json?'+'key='+grapikey+'&isbns='+isbn,function(data){
             
             // test goodreads data response
             console.log('goodreads rating: '+data.books[0].average_rating);
@@ -207,4 +209,8 @@ function insertRatingGR(parent,link,rating){
     }
 
 })();
+
+function newFunction() {
+    return 'hqtHAxKsgeHAQ189LEVjg';
+}
 
