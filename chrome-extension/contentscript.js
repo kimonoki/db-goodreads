@@ -1,38 +1,26 @@
 
 
-// ==UserScript==
-// @name         Douban Goodreads Ratings
-// @version      1.2
-// @description  Show Goodreads ratings on Douban
-// @description:zh-CN 在豆瓣读书界面上显示goodreads评分
-// @author       kimonoki
-// @match        *://book.douban.com/subject/*
-// @match        *://www.goodreads.com/book/show/*
-// @grant        GM_xmlhttpRequest
-// @connect      api.douban.com
-// @connect      www.goodreads.com
-// @connect      www.googleapis.com
-// ==/UserScript==
-
 function getApikey(){
-    return 'enter your apikey here';
+    return 'hqtHAxKsgeHAQ189LEVjg';
 }
 
 
-function getJSON_GM(url, callback) {
-    GM_xmlhttpRequest({
-        method: 'GET',
-        url: url,
-        onload: function(response) {
-            if (response.status >= 200 && response.status < 400)  //success response 2xx Success
-                callback(JSON.parse(response.responseText));
-            else
-                console.log('Error getting ' + url + ': ' + response.statusText);  //print error message
-        },
-        onerror: function(response) {
-            console.log('Error during GM_xmlhttpRequest to ' + url + ': ' + response.statusText);
-        }
-    });
+function getJSON(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+
+    xhr.onload = function () {
+        if (this.status >= 200 && this.status < 400)
+            callback(JSON.parse(this.responseText));
+        else
+            console.log('Error getting ' + url + ': ' + this.statusText);
+    };
+
+    xhr.onerror = function () {
+        console.log('Error during XMLHttpRequest to ' + url);
+    };
+
+    xhr.send();
 }
 
 function isEmpty(s){
@@ -104,21 +92,17 @@ function insertRatingGR(parent,link,rating){
 
 
 (function(){
-
-   
-
-
-
+    
     const grapikey= getApikey();
-
-
-    let host= location.hostname;
+    let host= window.location.hostname;
+    
     let isbn10=0; 
     let isbn13=0;
     let isbn=0;
 
+    
     if (host==='book.douban.com') {
-        
+        console.log(host);
         //insert goodreads ratings
         let sectl = document.getElementById('interest_sectl');
         let ratings = document.createElement('div');
@@ -130,7 +114,8 @@ function insertRatingGR(parent,link,rating){
         // insert the wrapper of the rating section
 
         let dbbook_id=location.href.match(/douban\.com\/subject\/(\d+)/)[1]; 
-        getJSON_GM('https://api.douban.com/v2/book/'+dbbook_id,function (data){
+        console.log(dbbook_id);
+        getJSON('https://api.douban.com/v2/book/'+dbbook_id,function (data){
             isbn10=data.isbn10;
             isbn13=data.isbn13;
             let isbn=getIsbn(isbn13,isbn10);
@@ -141,7 +126,7 @@ function insertRatingGR(parent,link,rating){
             },500);
 
             //get goodreads rating and info
-            getJSON_GM('https://www.goodreads.com/book/review_counts.json?'+'key='+grapikey+'&isbns='+isbn,function(data){
+            getJSON('https://www.goodreads.com/book/review_counts.json?'+'key='+grapikey+'&isbns='+isbn,function(data){
             
             // test goodreads data response
             console.log('goodreads rating: '+data.books[0].average_rating);
@@ -164,7 +149,7 @@ function insertRatingGR(parent,link,rating){
 
 
             //get google books rating and info
-            getJSON_GM('https://www.googleapis.com/books/v1/volumes?q=isbn:'+getIsbn(isbn10,isbn13),function(data){
+            getJSON('https://www.googleapis.com/books/v1/volumes?q=isbn:'+getIsbn(isbn10,isbn13),function(data){
                 if(!isEmpty(data.items[0])){
                     console.log('google books rating: '+data.items[0].volumeInfo.averageRating);
                 }
@@ -197,7 +182,7 @@ function insertRatingGR(parent,link,rating){
         isbn13 =ISBN[2];
         isbn=getIsbn(isbn13,isbn10);
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
-        getJSON_GM('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
+        getJSON('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
             if(!isEmpty(data.rating)){
                 console.log(data.rating.average);
                 insertRatingGR(bookMeta,'https://book.douban.com/subject/'+data.id,data.rating.average);
@@ -208,9 +193,11 @@ function insertRatingGR(parent,link,rating){
 
     }
 
-})();
 
-function newFunction() {
-    return 'hqtHAxKsgeHAQ189LEVjg';
-}
+
+})();
+    
+
+
+
 
