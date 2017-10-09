@@ -3,5 +3,3 @@
 
 ![screenshotgit](screenshot.png)
 
-### To do
-- chrome extensioin
