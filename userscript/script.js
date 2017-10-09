@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 function getApikey(){
-    return 'hqtHAxKsgeHAQ189LEVjg';
+    return 'enter your apikey here';
 }
 
 
