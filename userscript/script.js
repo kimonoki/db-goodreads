@@ -1,5 +1,3 @@
-
-
 // ==UserScript==
 // @name         Douban Goodreads Ratings
 // @version      1.2
@@ -15,6 +13,7 @@
 // ==/UserScript==
 
 function getApikey(){
+    // get the Api Key via https: //www.goodreads.com/api/keys
     return 'enter your apikey here';
 }
 
@@ -75,7 +74,7 @@ function insertRatingDB(parent,title,rating,ratings_count,text_reviews_count,lin
     
 }
 
-function insertRatingGR(parent,link,rating){
+function insertRatingGR(parent,link,rating,ratersnumber){
     rating=rating/2;
     let star;
     for(var i = 0;i<Math.floor(rating);i++){
@@ -95,10 +94,14 @@ function insertRatingGR(parent,link,rating){
         '<span class="stars staticStars">'+star+'</span>'+
         '<span class="value rating">'+'<span class="average" itemprop="ratingValue">'+' '+rating+'</span>'+'</span>'+
         '<span class="greyText">'+'&nbsp;·&nbsp;'+'</span>'+
-        '<a class="actionLinkLite" style="cursor: pointer; " href="'+link+'">'+' Douban 评分 '+'</a>'+
-    '</div>'
-    
-    )
+        '<a class="actionLinkLite" style="cursor: pointer; " href="'+link+'">'+' 豆瓣页面 '+'</a>'+
+        '<span class="greyText">'+'&nbsp;·&nbsp;'+'</span>'+
+        '<a class="gr-hyperlink" href="'+link+'/collections'+'">'+
+        '<span class="votes value-title" title="'+ratersnumber+'">'+ratersnumber+'</span>'+ '人评价' +'</a>'+
+        '<span class="greyText">'+'&nbsp;·&nbsp;'+'</span>'+
+        '<a class="gr-hyperlink" href="+'+link+'+/reviews'+'">'+'全部书评'+'</a>'+
+        '</div>'
+    );
 }
 
 
@@ -117,6 +120,8 @@ function insertRatingGR(parent,link,rating){
     let isbn13=0;
     let isbn=0;
 
+
+    //display gr's rating on douban
     if (host==='book.douban.com') {
         
         //insert goodreads ratings
@@ -159,7 +164,7 @@ function insertRatingGR(parent,link,rating){
                     document.getElementsByClassName('rating_wrap')[0].style.display='none';
                 }
 
-            })
+            });
 
 
 
@@ -169,7 +174,7 @@ function insertRatingGR(parent,link,rating){
                     console.log('google books rating: '+data.items[0].volumeInfo.averageRating);
                 }
             //rating_wrap.insertAdjacentHTML(ratings,'Google Books Info')
-            })
+            });
         });
 
         
@@ -180,7 +185,7 @@ function insertRatingGR(parent,link,rating){
 
 
 
-
+    //display douban's rating on gr
     else if (host==='www.goodreads.com'){
         let ISBN;
         let details=document.getElementById('bookDataBox');
@@ -198,19 +203,20 @@ function insertRatingGR(parent,link,rating){
         isbn=getIsbn(isbn13,isbn10);
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
         getJSON_GM('https://api.douban.com/v2/book/isbn/'+isbn,function(data){
-            if(!isEmpty(data.rating)){
+            if (!isEmpty(data.rating) || data.rating.average!=0) {
                 console.log(data.rating.average);
-                insertRatingGR(bookMeta,'https://book.douban.com/subject/'+data.id,data.rating.average);
+                insertRatingGR(bookMeta,'https://book.douban.com/subject/'+data.id,data.rating.average,data.rating.numRaters);
+            }
+            else{
+                console.log('not enough rating on douban')
             }
 
 
-        })
+        });
 
     }
 
 })();
 
-function newFunction() {
-    return 'hqtHAxKsgeHAQ189LEVjg';
-}
+
 

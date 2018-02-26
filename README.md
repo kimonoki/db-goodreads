@@ -1,5 +1,9 @@
 # db-goodreads
-## userscript for showing goodreads ratings on douban book
+Userscript and chrome extension for showing goodreads ratings on douban book, and vice versa.
 
-![screenshotgit](screenshot.png)
+### On douban.com
+![screenshotdouban](douban-screenshot.png)
+
+### On goodreads.com
+![screenshotgoodreads](goodreads-screenshot.png)
 
