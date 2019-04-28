@@ -16,7 +16,7 @@
 //parse the web to get the ISBN
 const regex = /ISBN: (\d*)/gm;
 var str = $('#info').text();
-var bookISBN = regex.exec(str);
+var bookISBN = regex.exec(str)[1];
 console.log(bookISBN);
 
 function getApikey() {
@@ -92,7 +92,7 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
         star += '<span size="12x12" class="staticStar p3"></span>';
     }
     if (5 - Math.ceil(rating)) {
-        star += '<span size="12x12" class="staticStar p0"></span>'
+        star += '<span size="12x12" class="staticStar p0"></span>';
     }
     parent.insertAdjacentHTML('afterend',
         ' <div class="uitext stacked hreview-aggregate" style="position: relative; border-top:1px solid #ddd; padding-top:10px" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">' +
@@ -145,7 +145,7 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
             //insert goodreading ratings
             if (data.books[0].reviews_count) {
                 sectl.insertBefore(ratings, rating_wrap.previousSibling);
-                insertRatingDB(ratings, 'Goodreads Rating', data.books[0].average_rating, data.books[0].ratings_count, data.books[0].text_reviews_count, 'https://www.goodreads.com/book/isbn/' + isbn);
+                insertRatingDB(ratings, 'Goodreads Rating', data.books[0].average_rating, data.books[0].ratings_count, data.books[0].text_reviews_count, 'https://www.goodreads.com/book/isbn/'+isbn);
             }
 
             //change dbrating into nondisplay elements if there is none
