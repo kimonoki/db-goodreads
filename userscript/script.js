@@ -12,7 +12,6 @@
 // @connect      www.googleapis.com
 // ==/UserScript==
 
-
 //parse the web to get the ISBN
 const regex = /ISBN: (\d*)/gm;
 var str = $('#info').text();
@@ -24,18 +23,17 @@ function getApikey() {
     return 'Enter your API key here';
 }
 
-
 function getJSON_GM(url, callback) {
     GM_xmlhttpRequest({
         method: 'GET',
         url: url,
-        onload: function(response) {
+        onload: function (response) {
             if (response.status >= 200 && response.status < 400) //success response 2xx Success
                 callback(JSON.parse(response.responseText));
             else
                 console.log('Error getting ' + url + ': ' + response.statusText); //print error message
         },
-        onerror: function(response) {
+        onerror: function (response) {
             console.log('Error during GM_xmlhttpRequest to ' + url + ': ' + response.statusText);
         }
     });
@@ -111,7 +109,7 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
 
 
 
-(function() {
+(function () {
     const grapikey = getApikey();
     let host = location.hostname;
 
@@ -132,12 +130,12 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
         if (!isbn) { //no isbn data returned
             console.log('no isbn data,please find another id of this book');
         }
-        setTimeout(function() { //limitation of GR's api: once per second
+        setTimeout(function () { //limitation of GR's api: once per second
         }, 500);
 
 
         //get goodreads rating and info
-        getJSON_GM('https://www.goodreads.com/book/review_counts.json?' + 'key=' + grapikey + '&isbns=' + bookISBN, function(data) {
+        getJSON_GM('https://www.goodreads.com/book/review_counts.json?' + 'key=' + grapikey + '&isbns=' + bookISBN, function (data) {
 
             // test goodreads data response
             console.log('goodreads rating: ' + data.books[0].average_rating);
@@ -145,9 +143,10 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
             //insert goodreading ratings
             if (data.books[0].reviews_count) {
                 sectl.insertBefore(ratings, rating_wrap.previousSibling);
-                insertRatingDB(ratings, 'Goodreads Rating', data.books[0].average_rating, data.books[0].ratings_count, data.books[0].text_reviews_count, 'https://www.goodreads.com/book/isbn/'+isbn);
+                insertRatingDB(ratings, 'Goodreads Rating', data.books[0].average_rating, data.books[0].ratings_count, data.books[0].text_reviews_count, 'https://www.goodreads.com/book/isbn/' + isbn);
             }
 
+            // TODO: This need to be fixed
             //change dbrating into nondisplay elements if there is none
             if (data.books[0].reviews_count && document.getElementsByClassName('rating_num')[1].innerText === '') {
                 document.getElementsByClassName('rating_wrap')[0].style.display = 'none';
@@ -155,8 +154,6 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
 
         });
     }
-
-
 
     //display douban's rating on gr
     else if (host === 'www.goodreads.com') {
@@ -174,7 +171,7 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
         isbn13 = ISBN[2];
         isbn = getIsbn(isbn13, isbn10);
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
-        getJSON_GM('https://api.douban.com/v2/book/isbn/' + isbn, function(data) {
+        getJSON_GM('https://api.douban.com/v2/book/isbn/' + isbn, function (data) {
             if (!isEmpty(data.rating) || data.rating.average != 0) {
                 console.log(data.rating.average);
                 insertRatingGR(bookMeta, 'https://book.douban.com/subject/' + data.id, data.rating.average, data.rating.numRaters);
@@ -186,5 +183,4 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
         });
 
     }
-
 })();
