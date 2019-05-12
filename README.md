@@ -14,3 +14,4 @@ Userscript and chrome extension for showing goodreads ratings on douban book, an
 
 
 
+## NB: Chrome extension is broken now. WIP
