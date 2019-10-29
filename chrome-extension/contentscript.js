@@ -1,5 +1,6 @@
 function getApikey(){
-    return 'hqtHAxKsgeHAQ189LEVjg';   //my apikey
+    // get the Api Key via https://www.goodreads.com/api/keys
+    return 'Enter your API key here';
 }
 
 
