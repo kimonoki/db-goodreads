@@ -1,3 +1,6 @@
+## NB: Goodreads no longer issues new keys for API now
+
+
 # db-goodreads
 Userscript and chrome extension for showing goodreads ratings on douban book, and vice versa.
 
@@ -14,4 +17,3 @@ Userscript and chrome extension for showing goodreads ratings on douban book, an
 
 
 
-## NB: Chrome extension is broken now. WIP
