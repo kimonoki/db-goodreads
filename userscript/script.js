@@ -12,34 +12,17 @@
 // @connect      www.googleapis.com
 // ==/UserScript==
 
-
 //parse the web to get the ISBN
 const regex = /ISBN: (\d*)/gm;
 var str = $('#info').text();
-var bookISBN = regex.exec(str)[1];
-console.log(bookISBN);
+var match = regex.exec(str);
+var bookISBN = match ? match[1] : null;
 
-function getApikey() {
-    // get the Api Key via https: //www.goodreads.com/api/keys
-    return 'Enter your API key here';
+if (!bookISBN) {
+    console.log('ISBN not found');
+    return;
 }
-
-
-function getJSON_GM(url, callback) {
-    GM_xmlhttpRequest({
-        method: 'GET',
-        url: url,
-        onload: function(response) {
-            if (response.status >= 200 && response.status < 400) //success response 2xx Success
-                callback(JSON.parse(response.responseText));
-            else
-                console.log('Error getting ' + url + ': ' + response.statusText); //print error message
-        },
-        onerror: function(response) {
-            console.log('Error during GM_xmlhttpRequest to ' + url + ': ' + response.statusText);
-        }
-    });
-}
+console.log('Found ISBN:', bookISBN);
 
 function isEmpty(s) {
     return !s;
@@ -55,7 +38,10 @@ function isPlural(n) {
 }
 
 function getIsbn(isbn13, isbn10) {
-
+    if (!isbn13 && !isbn10) {
+        console.log('No valid ISBN found');
+        return null;
+    }
     return isbn13 || isbn10;
 }
 
@@ -109,56 +95,91 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
     );
 }
 
+function getGoodreadsRating(isbn, callback) {
+    GM_xmlhttpRequest({
+        method: 'GET',
+        url: `https://www.goodreads.com/book/isbn/${isbn}`,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        onload: function(response) {
+            if (response.status === 200) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(response.responseText, 'text/html');
 
+                // Try different selectors to find the rating
+                let ratingElement = doc.querySelector('.RatingStatistics__rating') ||
+                                  doc.querySelector('.RatingStars__rating') ||
+                                  doc.querySelector('span.rating');
 
-(function() {
-    const grapikey = getApikey();
+                if (ratingElement) {
+                    const rating = parseFloat(ratingElement.textContent.trim());
+                    // Get number of ratings
+                    const ratingsCountElement = doc.querySelector('.RatingStatistics__meta') ||
+                                             doc.querySelector('.RatingStars__meta');
+                    const ratingsCount = ratingsCountElement ?
+                        parseInt(ratingsCountElement.textContent.match(/\d+/)[0]) : 0;
+
+                    callback({
+                        average_rating: rating,
+                        ratings_count: ratingsCount,
+                        text_reviews_count: ratingsCount // 由于无法准确获取评论数，暂用评分数代替
+                    });
+                } else {
+                    console.log('Could not find rating information on the page');
+                    callback(null);
+                }
+            } else {
+                console.log('Failed to fetch Goodreads page');
+                callback(null);
+            }
+        },
+        onerror: function(response) {
+            console.log('Error occurred while requesting Goodreads page');
+            callback(null);
+        }
+    });
+}
+
+(function () {
     let host = location.hostname;
 
-    //display gr's rating on douban
+    //display Goodreads rating on Douban
     if (host === 'book.douban.com') {
         //insert goodreads ratings
         let sectl = document.getElementById('interest_sectl');
         let ratings = document.createElement('div');
         ratings.style.marginBottom = '15px';
-        //if there's friends' rating,insert after it
+        //if there's friends' rating, insert after it
         let rating_wrap = document.querySelector('.friends_rating_wrap');
-        if (!rating_wrap) //if no insert directly
+        if (!rating_wrap) //if not found, insert directly
             rating_wrap = document.querySelector('.rating_wrap');
-        // insert the wrapper of the rating section
-
+        
         let dbbook_id = location.href.match(/douban\.com\/subject\/(\d+)/)[1];
         let isbn = bookISBN;
-        if (!isbn) { //no isbn data returned
-            console.log('no isbn data,please find another id of this book');
+        if (!isbn) {
+            console.log('No ISBN data found, please try another book ID');
         }
-        setTimeout(function() { //limitation of GR's api: once per second
+        setTimeout(function () { //prevent too many requests
         }, 500);
 
 
         //get goodreads rating and info
-        getJSON_GM('https://www.goodreads.com/book/review_counts.json?' + 'key=' + grapikey + '&isbns=' + bookISBN, function(data) {
-
-            // test goodreads data response
-            console.log('goodreads rating: ' + data.books[0].average_rating);
-
-            //insert goodreading ratings
-            if (data.books[0].reviews_count) {
+        getGoodreadsRating(bookISBN, function(data) {
+            if (data) {
                 sectl.insertBefore(ratings, rating_wrap.previousSibling);
-                insertRatingDB(ratings, 'Goodreads Rating', data.books[0].average_rating, data.books[0].ratings_count, data.books[0].text_reviews_count, 'https://www.goodreads.com/book/isbn/'+isbn);
-            }
+                insertRatingDB(ratings, 'Goodreads Rating', data.average_rating,
+                             data.ratings_count, data.text_reviews_count,
+                             'https://www.goodreads.com/book/isbn/' + isbn);
 
-            //change dbrating into nondisplay elements if there is none
-            if (data.books[0].reviews_count && document.getElementsByClassName('rating_num')[1].innerText === '') {
-                document.getElementsByClassName('rating_wrap')[0].style.display = 'none';
+                if (data.ratings_count && document.getElementsByClassName('rating_num')[1].innerText === '') {
+                    document.getElementsByClassName('rating_wrap')[0].style.display = 'none';
+                }
             }
-
         });
     }
 
-
-
-    //display douban's rating on gr
+    //display Douban rating on Goodreads
     else if (host === 'www.goodreads.com') {
         let ISBN;
         let details = document.getElementById('bookDataBox');
@@ -174,17 +195,16 @@ function insertRatingGR(parent, link, rating, ratersnumber) {
         isbn13 = ISBN[2];
         isbn = getIsbn(isbn13, isbn10);
         //let grbook_id=location.href.match(/goodreads.com\/book\/show\/(\d)\s/)[1];
-        getJSON_GM('https://api.douban.com/v2/book/isbn/' + isbn, function(data) {
+        getJSON_GM('https://api.douban.com/v2/book/isbn/' + isbn, function (data) {
             if (!isEmpty(data.rating) || data.rating.average != 0) {
                 console.log(data.rating.average);
                 insertRatingGR(bookMeta, 'https://book.douban.com/subject/' + data.id, data.rating.average, data.rating.numRaters);
             } else {
-                console.log('not enough rating on douban');
+                console.log('Not enough ratings on Douban');
             }
 
 
         });
 
     }
-
 })();
