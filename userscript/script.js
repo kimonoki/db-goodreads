@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Douban Goodreads Ratings
 // @version      2.0
-// @description  Show Goodreads ratings on Douban
-// @description:zh-CN Show Goodreads ratings on Douban books
+// @description  Show Goodreads ratings on Douban, and vice versa
+// @description:zh-CN 在Goodreads上显示豆瓣评分，在豆瓣上显示goodreads评分
 // @author       kimonoki
 // @match        *://book.douban.com/subject/*
 // @match        *://www.goodreads.com/book/show/*
